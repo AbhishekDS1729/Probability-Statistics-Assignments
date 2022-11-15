@@ -1,0 +1,106 @@
+---
+title: "Assignment2_q5"
+author: "Soham Sengupta"
+date: "15/11/2022"
+output:
+  html_document:
+    df_print: paged
+Roll: MDS202241
+---
+
+## Problem 5: Computational Finance - Modelling Stock prices
+
+Following piece of code download the prices of TCS since 2007
+
+```{r}
+library(quantmod)
+getSymbols('TCS.NS')
+tail(TCS.NS)
+```
+Plot the adjusted close prices of TCS
+```{r}
+plot(TCS.NS$TCS.NS.Adjusted)
+```
+**Download the data of market index Nifty50**. The Nifty 50 index indicates how the over all market has done over the similar period.
+```{r}
+getSymbols('^NSEI')
+tail(NSEI)
+```
+Plot the adjusted close value of Nifty50
+```{r}
+plot(NSEI$NSEI.Adjusted)
+```
+### Log-Return 
+We calculate the daily log-return, where log-return is defined as
+$$
+r_t=\log(P_t)-\log(P_{t-1})=\Delta \log(P_t),
+$$
+where $P_t$ is the closing price of the stock on $t^{th}$ day.
+
+```{r}
+TCS_rt = diff(log(TCS.NS$TCS.NS.Adjusted))
+Nifty_rt = diff(log(NSEI$NSEI.Adjusted))
+retrn = cbind.xts(TCS_rt,Nifty_rt) 
+retrn = na.omit(data.frame(retrn))
+
+plot(retrn$NSEI.Adjusted,retrn$TCS.NS.Adjusted
+     ,pch=20
+     ,xlab='Market Return'
+     ,ylab='TCS Return'
+     ,xlim=c(-0.18,0.18)
+     ,ylim=c(-0.18,0.18))
+grid(col='grey',lty=1)
+```
++ Consider the following model:
+
+$$
+r_{t}^{TCS}=\alpha + \beta r_{t}^{Nifty} + \varepsilon,
+$$
+where $\mathbb{E}(\varepsilon)=0$ and $\mathbb{V}ar(\varepsilon)=\sigma^2$.
+
+1. Estimate the parameters of the models $\theta=(\alpha,\beta,\sigma)$ using the method of moments type plug-in estimator discussed in the class.
+
+2. Estimate the parameters using the `lm` built-in function of `R`. Note that `lm` using the OLS method.
+
+3. Fill-up the following table
+
+Parameters | Method of Moments | OLS
+-----------|-------------------|-----
+$\alpha$   |     0.000463      |0.0004628
+$\beta$    |     0.743684      |0.7436838
+$\sigma$   |     0.016185      |0.01619
+
+4. If the current value of Nifty is 18000 and it goes up to 18200. The current value of TCS is Rs. 3200/-. How much you can expect TCS price to go up?
+```{r}
+##Part 1
+##Using method of moments in simple linear regression model we have the following eqn
+##1->E[Y-alpha-beta*X]=0
+##2->E[(Y-alpha-beta*X)*X]=0
+##3->E[e^2]=sigma^2
+##Solving we get
+##beta=cov(x,y)/var(x)
+## alpha= E(Y) - beta*E(x)
+## sigma=
+
+beta= cov(retrn$NSEI.Adjusted,retrn$TCS.NS.Adjusted)/var(retrn$NSEI.Adjusted)
+alpha= mean(retrn$TCS.NS.Adjusted) - beta* mean(retrn$NSEI.Adjusted)
+yhat= alpha+beta*retrn$NSEI.Adjusted
+sigma=(var(retrn$TCS.NS.Adjusted-yhat))^0.5
+sprintf("Estimated value of Alpha: %f",alpha)
+sprintf("Estimated value of Beta: %f",beta)
+sprintf("Estimated value of sigma: %f",sigma)
+
+```
+```{r}
+## Part 2
+simple_fit = lm(retrn$TCS.NS.Adjusted~retrn$NSEI.Adjusted, data=retrn)
+summary(simple_fit)
+```
+```{r}
+##Part 4
+r4n=log(18200)-log(18000)
+r4t=0.0004628+0.7436838*r4n
+x=exp(r4t+log(3200))
+sprintf("Expected Price of TCS: %f",x)
+
+```
