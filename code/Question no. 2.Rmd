@@ -1,0 +1,139 @@
+---
+title: "Question no. 2"
+author: "Abhishek Chakraborty"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,warning = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+```
+
+
+
+1.
+
+```{r}
+ll = function(log_al, x, si){
+  log_like = sum(log(dgamma(x, shape = exp(log_al), scale = si)))
+  return(-log_like)
+}
+
+MyMLE = function(x, si){
+  log_al_initial_guess = log(mean(x)^2/var(x))
+  estimator = optim(log_al_initial_guess,ll, x = x, si = si)
+  log_al_hat = estimator$par
+  return(log_al_hat)
+} 
+
+```
+
+```{r}
+estimate = function(n,al,si){
+  estimates = c()
+  for (i in 1:1000){
+    samples = rgamma(n,shape = al,scale = si)
+    estimates = append(estimates, MyMLE(x = samples, si = si))
+  }
+  return(estimates)
+}
+```
+
+2.
+
+```{r}
+n = 20
+al = 1.5
+si = 2.2
+
+est_MLE = tibble(estimate(n = n, al = al, si = si))
+colnames(est_MLE) = c("MLE Estimates")
+
+plt = ggplot(est_MLE,aes(`MLE Estimates`))
+plt = plt+geom_histogram(fill = "#DA5724",color = "#38333E",binwidth = 0.02)
+plt = plt+geom_vline(xintercept = log(al),
+              size = 0.7,color = "black")
+
+
+percentile_2.5 = quantile(est_MLE$`MLE Estimates`, probs = 0.025)
+
+percentile_97.5 = quantile(est_MLE$`MLE Estimates`, probs = 0.975) 
+plt = plt+geom_vline(xintercept = percentile_2.5,
+                     size = 0.7,color = "green")
+plt = plt+geom_vline(xintercept = percentile_97.5,
+                     size = 0.7,color = "blue")
+plt
+gap1 = as.numeric(percentile_97.5) - as.numeric(percentile_2.5)
+gap1
+```
+
+3.
+
+```{r}
+n = 40
+al = 1.5
+si = 2.2
+
+est_MLE = tibble(estimate(n = n, al = al, si = si))
+colnames(est_MLE) = c("MLE Estimates")
+
+plt = ggplot(est_MLE,aes(`MLE Estimates`))
+plt = plt+geom_histogram(fill = "#DA5724",color = "#38333E",binwidth = 0.02)
+plt = plt+geom_vline(xintercept = log(al),
+              size = 0.7,color = "black")
+
+
+percentile_2.5 = quantile(est_MLE$`MLE Estimates`, probs = 0.025)
+
+percentile_97.5 = quantile(est_MLE$`MLE Estimates`, probs = 0.975) 
+plt = plt+geom_vline(xintercept = percentile_2.5,
+                     size = 0.7,color = "green")
+plt = plt+geom_vline(xintercept = percentile_97.5,
+                     size = 0.7,color = "blue")
+plt
+gap2 = as.numeric(percentile_97.5) - as.numeric(percentile_2.5)
+gap2
+```
+
+4.
+
+```{r}
+n = 100
+al = 1.5
+si = 2.2
+
+est_MLE = tibble(estimate(n = n, al = al, si = si))
+colnames(est_MLE) = c("MLE Estimates")
+
+plt = ggplot(est_MLE,aes(`MLE Estimates`))
+plt = plt+geom_histogram(fill = "#DA5724",color = "#38333E",binwidth = 0.02)
+plt = plt+geom_vline(xintercept = log(al),
+              size = 0.7,color = "black")
+
+
+percentile_2.5 = quantile(est_MLE$`MLE Estimates`, probs = 0.025)
+
+percentile_97.5 = quantile(est_MLE$`MLE Estimates`, probs = 0.975) 
+plt = plt+geom_vline(xintercept = percentile_2.5,
+                     size = 0.7,color = "green")
+plt = plt+geom_vline(xintercept = percentile_97.5,
+                     size = 0.7,color = "blue")
+plt
+gap3 = as.numeric(percentile_97.5) - as.numeric(percentile_2.5)
+gap3
+```
+
+5.
+
+```{r}
+gap1
+gap2
+gap3
+```
+As it is evident from both the graphs and the numeric results, the gap between 97.5 percentile and 2.5 percentile decreases as the sample size increases.

@@ -1,0 +1,121 @@
+---
+title: "Question no. 4"
+author: "Abhishek Chakraborty"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,warning = FALSE)
+```
+
+```{r}
+library(MASS)
+plot(Insurance$Holders,Insurance$Claims,
+     xlab = "Holders", ylab = "Claims", pch = 20)
+grid()
+```
+
+A.
+
+```{r}
+normal_neg_loglike = function(param, data1, data2){
+  beta0 = param[1]
+  beta1 = param[2]
+  sigma = param[3]
+  data2 = beta0 + beta1*data2
+  log_like = sum(dnorm(data1, mean = data2, sd = sigma, log = TRUE))
+  return(-log_like)
+}
+
+claims = Insurance$Claims
+holders = Insurance$Holders
+
+estimator = optim(c(4,0,1), normal_neg_loglike, , data1 = claims, data2 = holders)
+estimator$par
+
+BIC = length(estimator$par) * log(length(claims)) + 2 * log(estimator$value)
+BIC
+```
+
+B.
+
+```{r}
+library("VGAM")
+laplace_neg_loglike = function(param, data1, data2){
+  beta0 = param[1]
+  beta1 = param[2]
+  sigma = param[3]
+  data2 = beta0 + beta1*data2
+  log_like = sum(dlaplace(data1, location = data2, scale = sigma, log = TRUE))
+  return(-log_like)
+}
+
+claims = Insurance$Claims
+holders = Insurance$Holders
+
+estimator = optim(c(1,0,1), laplace_neg_loglike, , data1 = claims, data2 = holders)
+estimator$par
+
+BIC = length(estimator$par) * log(length(claims)) + 2 * log(estimator$value)
+BIC
+```
+
+C.
+
+```{r}
+lognormal_neg_loglike = function(param, data1, data2){
+  n = length(data1)
+  beta0 = param[1]
+  beta1 = param[2]
+  sigma = param[3]
+  log_like = 0
+  for (i in 1:n){
+    if (data1[i] > 0){
+      mu = beta0 + beta1*data2[i]
+      log_like = log_like + dlnorm(data1[i], meanlog = mu, sdlog = sigma, log = TRUE)
+    }
+  }
+  return(-log_like)
+}
+
+claims = Insurance$Claims
+holders = Insurance$Holders
+
+estimator = optim(c(1,0,1), lognormal_neg_loglike, , data1 = claims, data2 = holders)
+estimator$par
+
+BIC = length(estimator$par) * log(length(claims)) + 2 * log(estimator$value)
+BIC
+```
+
+D.
+
+```{r}
+gamma_neg_loglike = function(param, data1, data2){
+  n = length(data1)
+  beta0 = param[1]
+  beta1 = param[2]
+  sigma = param[3]
+  log_like = 0
+  for (i in 1:n){
+    if (data1[i] > 0){
+      mu = beta0 + beta1*data2[i]
+      log_like = log_like + dgamma(data1[i], shape = mu, scale = sigma, log = TRUE)
+    }
+  }
+  return(-log_like)
+}
+
+claims = Insurance$Claims
+holders = Insurance$Holders
+
+estimator = optim(c(1,0,1), gamma_neg_loglike, , data1 = claims, data2 = holders)
+estimator$par
+
+BIC = length(estimator$par) * log(length(claims)) + 2 * log(estimator$value)
+BIC
+
+```
+
+Now we will try to compare the BICs for all the models. The BIC for the first model, that is, the Gaussian model, the BIC is 23.5127. For the second model, that is, the Laplace model, the value of BIC is coming as 23.46364. For the third model, that is, the Lognormal model, the value of BIC is coming as 23.73025 and for the last model, that is, the Gamma model, the value of BIC is coming as 23.2529
