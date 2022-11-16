@@ -1,0 +1,121 @@
+---
+title: "Problem 1"
+author: "Ujan Dasgupta"
+date: "15/11/2022"
+output: html_document
+---
+1. 
+
+Given,  
+\begin{equation}
+\begin{alignedat}{3}
+\mathbb{P}[X = 0] = a\\
+\mathbb{P}[X = x] = ar^x
+\end{alignedat}
+\end{equation}
+where $x\geq 0$ and $x\in \mathbb{N}$. Now we know that
+\begin{equation}
+\begin{alignedat}{3}
+& \sum_{x = 0}^\infty \mathbb{P}[X=x] = 1\\
+\Rightarrow\; & \sum_{x = 0}^\infty ar^x = 1\\
+\Rightarrow\; & a\left[1 + r + r^2 + \cdots\right] = 1\\
+\Rightarrow\; & \frac{a}{1-r} = 1\\
+\Rightarrow\; & a = 1-r
+\end{alignedat}
+\end{equation}
+
+Since we must have $0<a<1$ we should have $0<r<1$. This is our necessary condition. The probability distribution model is as follows:
+\begin{equation}
+\begin{alignedat}{3}
+p(x) &= ar^x = (1-r)r^x, \text{ when } x>0, x\in \mathbb{N}\\
+&= 0, \text{ otherwise}
+\end{alignedat}
+\end{equation}
+
+2. 
+
+For the expectation and variance to exist, $\mathbb{E}[\mid X\mid]$ and $\mathbb{E}\left[\left|X^2\right|\right]$ must exist. Here
+\begin{equation}
+\begin{alignedat}{3}
+\mathbb{E}[\mid X\mid] &= \sum_{x = 0}^\infty \mid x\mid (1-r)r^x\\
+                       &= \sum_{x = 0}^\infty x(1-r)r^x\\
+                       &< \infty
+\end{alignedat}
+\end{equation}
+$\therefore\;\; \mathbb{E}\left[\left|X\right|\right]$ exists.
+\begin{equation}
+\begin{alignedat}{3}
+\mathbb{E}[\mid X\mid] &= \sum_{x = 0}^\infty \mid x\mid (1-r)r^x\\
+                       &= \sum_{x = 0}^\infty x(1-r)r^x\\
+                       &< \infty
+\end{alignedat}
+\end{equation}
+
+3.
+We now have: \begin{align*} \mathbb{E}(X) &= \sum_{i} i\mathbb{P}(X=i)
+\\ &= \sum_{i} i(1-r)r^i \\ \implies \frac{\mathbb{E}(X)}{1-r} &=
+\sum_{i} ir^i \\ \implies \frac{\mathbb{E}(X)}{1-r} &= \frac{r}{(1-r)^2}
+\\ \implies \mathbb{E}(X) &= \frac{r}{1-r} \end{align*}
+
+Observe that \begin{align*} \mathbb{E}(X^2) &= \sum_{i} i^2
+\mathbb{P}(X=i) \\ &= \sum_{i} i^2(1-r)r^i \end{align*}
+
+Calculating the sum, we obtain: $$\mathbb{E}(X^2) =
+\frac{r(r+1)}{(1-r)^2}$$
+
+To calculate the variance, now: \begin{align*} \text{Var}(X) &=
+\mathbb{E}(X^2) - [\mathbb{E}(X)]^2 \\ &= \frac{r(r+1)}{(1-r)^2} -
+\frac{r^2}{(1-r)^2} \\ &= \frac{r}{(1-r)^2} \end{align*}
+
+4.
+From historical data we have Mean = 1.5,
+Hence, using the above model we have E(x)=1.5
+or, r/(1-r) = 1.5
+or, r= 1.5 - 1.5r
+```{r}
+r=1.5/2.5
+sprintf("Estimated value of r = %f",r)
+ ##Part a
+##P(Home team will have atleast 1 goal) = 1- P(X=0)
+p_4a=1-(1-r)
+sprintf("P(Home team will have atleast 1 goal) = %f",p_4a)
+
+##Part b
+#P(Home team will have atleast 1 goal but less than 4 goals)=P(X=1)+P(X=2)+P(X=3)
+p_4b= (1-r)*(r+r*r+r*r*r)
+sprintf("P(Home team will have atleast 1 goalbut less than 4 goals) = %f",p_4b)
+
+```
+
+5.
+We now have to use Poisson Distribution, from the historical data we have mean=1.5
+```{r}
+##Part A
+##P(Home team will have atleast 1 goal) = 1- P(X=0)
+p_5a=1-dpois(0,1.5)
+sprintf("P(Home team will have atleast 1 goal) = %f",p_5a)
+
+##Part b
+#P(Home team will have atleast 1 goal but less than 4 goals)=P(X=1)+P(X=2)+P(X=3)
+p_5b= dpois(1,1.5) + dpois(2,1.5) + dpois(3,1.5)
+sprintf("P(Home team will have atleast 1 goal but less than 4 goals) = %f",p_5b)
+
+```
+
+6.
+I will prefer model 1 (Geometric model) over the poisson probability model.
+As historical data suggests Var(x)>E(x)
+which is a case in geometric distribution as seen in part 3,
+whereas, in case of Poisson Distribution E(X) = Var(X), which doesn't hold for
+this data.
+
+
+7.   
+Write down the likelihood functions of your newly defined probability models and Poisson models. Clearly mention all the assumptions that you are making.     
+
+For the Poisson distribution: $$L(\lambda|\mathbf{x}) = \prod_{i=1}^{n}
+\frac{e^{-\lambda}\lambda^{x_i}}{x_i!} = e^{-n\lambda}
+\prod_{i=1}^{n}\frac{\lambda^{x_i}}{x_i!}$$
+
+For the geometric distribution: $$L(r|\mathbf{x}) = \prod_{i=1}^{n}
+(1-r)r^{x_i} = (1-r)^n\,r^{\sum_{i=1}^{n} x_i}$$
